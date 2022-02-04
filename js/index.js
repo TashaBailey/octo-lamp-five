@@ -18,16 +18,23 @@
 
       5. Add a countdown timer - when the time is up, end the quiz, display the score and highlight the correct answers
 *************************** */
+let submitButtonPressed = false;
 
 window.addEventListener('DOMContentLoaded', () => {
   const start = document.querySelector('#start');
   start.addEventListener('click', function (e) {
+    if (!submitButtonPressed) {
+      countdownTimer();
+    }
     document.querySelector('#quizBlock').style.display = 'block';
     start.style.display = 'none';
   });
   // quizArray QUESTIONS & ANSWERS
   // q = QUESTION, o = OPTIONS, a = CORRECT ANSWER
   // Basic ideas from https://code-boxx.com/simple-javascript-quiz/
+  
+  
+
   const quizArray = [
     {
       q: 'Which is the third planet from the sun?',
@@ -43,6 +50,16 @@ window.addEventListener('DOMContentLoaded', () => {
       q: 'What is the capital of Australia',
       o: ['Sydney', 'Canberra', 'Melbourne', 'Perth'],
       a: 1,
+    },
+    {
+      q: 'What does HTML stand for?',
+      o: ['Hyper Text Markup Language', 'Hype Text Language Markup', 'Hydro Text Make Language', 'Hyper Text Made Language'],
+      a: 0,
+    },
+    {
+      q: 'What does CSS stand for?',
+      o: ['Cascading Sheet Style', 'Create Style Sheet', 'Create Sheet Style', 'Cascading Style Sheet'],
+      a: 3,
     },
   ];
 
@@ -63,9 +80,12 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   };
 
+let score = 0;
+let quizTotal = 0;
+submitButtonPressed = false;
+
   // Calculate the score
   const calculateScore = () => {
-    let score = 0;
     quizArray.map((quizItem, index) => {
       for (let i = 0; i < 4; i++) {
         //highlight the li if it is the correct answer
@@ -76,15 +96,67 @@ window.addEventListener('DOMContentLoaded', () => {
 
         if (quizItem.a == i) {
           //change background color of li element here
+          liElement.style.color = 'white';
+          liElement.style.backgroundColor = 'lightseagreen';
         }
-
-        if (radioElement.checked) {
-          // code for task 1 goes here
-        }
+        
+          if (radioElement.checked) {
+            // code for task 1 goes here
+            if (quizItem.a == i) {
+              score++;
+            }
+          }
       }
     });
-  };
-
+  }
   // call the displayQuiz function
   displayQuiz();
+
+// if reset button is submitted then reload page
+const resetButton = document.querySelector('#btnReset');
+resetButton.onclick = () => {
+  window.location.reload();
+}
+
+const submitButton = document.querySelector('#btnSubmit');
+
+// when the time is up, end the quiz, display the score and highlight the answer.
+function countdownTimer(){
+  // set the date we are counting to
+  const deadline = new Date().getTime() + 60000;
+  // Update the count down every 1 second
+  var x = setInterval(function() {
+    console.log(submitButtonPressed);
+  // set todays date and time to start
+  const todaysDate = new Date().getTime();
+  // find the distance between now and count down date
+  const distance = deadline - todaysDate;
+  // time calculations
+  var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+  var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+  // output the result
+  document.getElementById('time').innerHTML = `${minutes} m ${seconds} s`;
+  // if countdown is over
+  if (distance < 0) {
+    clearInterval(x);
+    document.getElementById('time').innerHTML = "You are done!";
+    calculateScore();
+    const scoreDisplay = document.getElementById('score');
+    scoreDisplay.innerHTML = `<h2>You answered ${score} questions right</h2>`;
+  }
+  else if (submitButtonPressed === true) {
+    clearInterval(x);
+    document.getElementById('time').innerHTML = "You are done!";
+  }
+  
+}, 1000)
+};
+
+submitButton.addEventListener ('click', () => {
+  calculateScore();
+  submitButtonPressed = true;
+  const scoreDisplay = document.getElementById('score');
+  scoreDisplay.innerHTML = `<h2>You answered ${score} questions right</h2>`;
 });
+});
+
